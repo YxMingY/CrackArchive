@@ -10,7 +10,10 @@ int thread_count = 1;
 int passwd_len = 3;
 char fname[64];
 int alpha_count = 10;
-char alphabet[] = {'0','1','2','3','4','5','6','7','8','9'};
+char *usingbet;
+char numberbet[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+char alphabet[] = {'s','t','e','h','j','c','f','w','q','o','a','g','p','x','r','v','d','i','u','l','b','z','y','k','m','n'};
+char fullbet[] = {'c','e','z','j','y','a','t','p','9','o','w','x','k','2','8','6','i','1','3','v','m','0','h','u','r','l','s','5','b','7','4','f','q','n','d','g'};
 enum {
     INCORRECT_PASSWD = 0,
     CORRECT_PASSWD,
@@ -29,7 +32,7 @@ void IPasswd2StrPasswd(const int *ipasswd, char *passwd)
 {
     int j;
     for(j = 0;j < passwd_len;j++) {
-        passwd[j] = alphabet[ipasswd[j]];
+        passwd[j] = usingbet[ipasswd[j]];
     }
     passwd[j] = (char)0;
 }
@@ -134,8 +137,6 @@ int DoCrack()
 {
     int result = 0;
     int i,passwd_count_per_thread = pow(10,passwd_len)/thread_count+1;
-
-
     Arg args[thread_count];
     for (i = 0; i < thread_count; ++i) {
         int *ip;
@@ -164,8 +165,11 @@ int DoCrack()
         int end = 1;
         printf("\r");
         for (i = 0; i < thread_count; ++i) {
-            printf("[Id %d]%d/1000  ",i,args[i].process);
+            if (i < 4) {
+                printf("[Id %d]%d/1000  ", i, args[i].process);
+            }
         }
+        printf("Others is hidden");
         fflush(stdout);
 
         for (i = 0; i < thread_count; ++i) {
@@ -194,7 +198,7 @@ int main(int argc, char** argv)
             printf("[CrackArchive]Input archive filename:");
             fflush(stdout);
             gets(fname);
-            if (!access(fname, 0)) {
+            if (access(fname, 0)) {
                 printf("[CrackArchive]The file %s is invalid.\n",fname);
             } else {
                 break;
@@ -210,11 +214,30 @@ int main(int argc, char** argv)
         strcpy(fname,argv[1]);
         thread_count = atoi(argv[2]);
     }
+    int choose = -1;
+    while (1) {
+        printf("[CrackArchive]Choose an alphabet(0:number, 1:letters, 2:number&letters):");
+        fflush(stdout);
+        scanf("%d",&choose);
+        if (choose == 0) {
+            usingbet = numberbet;
+            break;
+        } else if (choose == 1) {
+            usingbet = alphabet;
+            alpha_count = 26;
+            break;
+        } else if (choose == 2) {
+            usingbet = fullbet;
+            alpha_count = 36;
+            break;
+        }
+    }
+
 
     printf("[CrackArchive]Cracking %s\n",fname);
     printf("[CrackArchive]Using %d threads\n",thread_count);
 
-    for (int i = 1; i <= 6; ++i) {
+    for (int i = 1; i <= 7; ++i) {
         passwd_len = i;
         printf("\n\n[CrackArchive]Setting passwd_len as %d\n",i);
         if(DoCrack()) {
@@ -227,6 +250,7 @@ int main(int argc, char** argv)
     printf("Enter anything to exit");
     fflush(stdout);
     getchar();
+    system("pause");
     return 0;
 }
 
