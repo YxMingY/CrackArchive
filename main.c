@@ -81,7 +81,7 @@ int TestPwRange(Arg *arg)
         passwd = malloc((passwd_len+1)*sizeof(char));
     }while (passwd == NULL);
     IPasswd2StrPasswd(arg->start_ipasswd,passwd);
-    printf("[Id %d]Begin cracking %s at \"%s\" %d passwds to go. \n",arg->t_id,fname,passwd,arg->passwd_count);
+    //printf("[Id %d]Begin cracking %s at \"%s\" %d passwds to go. \n",arg->t_id,fname,passwd,arg->passwd_count);
     while(1) {
         i = 0;
         while(1) {
@@ -136,7 +136,7 @@ void SleepMs(long milliseconds)
 int DoCrack()
 {
     int result = 0;
-    int i,passwd_count_per_thread = pow(10,passwd_len)/thread_count+1;
+    int i,passwd_count_per_thread = pow(alpha_count,passwd_len)/thread_count+1;
     Arg args[thread_count];
     for (i = 0; i < thread_count; ++i) {
         int *ip;
@@ -191,15 +191,14 @@ int DoCrack()
     return result;
 }
 
-int main(int argc, char** argv)
-{
-    if(argc != 3) {
+int main(int argc, char** argv) {
+    if (argc != 3) {
         while (1) {
             printf("[CrackArchive]Input archive filename:");
             fflush(stdout);
             gets(fname);
             if (access(fname, 0)) {
-                printf("[CrackArchive]The file %s is invalid.\n",fname);
+                printf("[CrackArchive]The file %s is invalid.\n", fname);
             } else {
                 break;
             }
@@ -211,14 +210,16 @@ int main(int argc, char** argv)
         thread_count = atoi(count);
     } else {
         puts("[CrackArchive]Usage: %s filename thread_count");
-        strcpy(fname,argv[1]);
+        strcpy(fname, argv[1]);
         thread_count = atoi(argv[2]);
     }
+    char schoose[10];
     int choose = -1;
     while (1) {
         printf("[CrackArchive]Choose an alphabet(0:number, 1:letters, 2:number&letters):");
         fflush(stdout);
-        scanf("%d",&choose);
+        gets(schoose);
+        choose = atoi(schoose);
         if (choose == 0) {
             usingbet = numberbet;
             break;
@@ -232,25 +233,39 @@ int main(int argc, char** argv)
             break;
         }
     }
+    printf("[");
+    for (int j = 0; j < alpha_count; ++j) {
+        printf("%c", usingbet[j]);
+    }
+    puts("]");
 
 
-    printf("[CrackArchive]Cracking %s\n",fname);
-    printf("[CrackArchive]Using %d threads\n",thread_count);
+    printf("[CrackArchive]Cracking %s\n", fname);
+    printf("[CrackArchive]Using %d threads\n", thread_count);
 
     for (int i = 1; i <= 7; ++i) {
         passwd_len = i;
-        printf("\n\n[CrackArchive]Setting passwd_len as %d\n",i);
-        if(DoCrack()) {
-            printf("\n[CrackArchive]passwd_len %d done.\n",i);
+        printf("\n[CrackArchive]Setting passwd_len as %d\n", i);
+        if (DoCrack()) {
+            printf("\n[CrackArchive]passwd_len %d done.\n", i);
             break;
         } else {
-            printf("\n[CrackArchive]passwd_len %d done with no result.\n",i);
+            printf("\n[CrackArchive]passwd_len %d done with no result.\n", i);
         }
     }
-    printf("Enter anything to exit");
-    fflush(stdout);
-    getchar();
-    system("pause");
+    while (1) {
+        printf("Input q to exit");
+        fflush(stdout);
+        int a = getchar();
+        if (a == 'q') {
+            break;
+        } else {
+            printf("[%c]",a);
+        }
+    }
+
+
+
     return 0;
 }
 
